@@ -4,7 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import HomeScreen from "./app/screens/HomeScreen";
 import HotelDetailScreen from "./app/screens/HotelDetailScreen";
-import FavoritesScreen from "./app/screens/FavoritesScreen";
+import FavorisScreen from "./app/screens/FavorisScreen";
 import MessagesScreen from "./app/screens/MessagesScreen";
 import ProfileScreen from "./app/screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,8 +47,12 @@ export default function App() {
           tabBarStyle: { backgroundColor: "#fff", paddingBottom: 5 },
         })}
       >
-        <Tab.Screen name="Acceuil" component={HomeStack} />
-        <Tab.Screen name="Favoris" component={FavoritesScreen} />
+        <Tab.Screen
+          name="Acceuil"
+          component={HomeStack}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen name="Favoris" component={FavorisScreen} />
         <Tab.Screen name="Messages" component={MessagesScreen} />
         <Tab.Screen name="Compte" component={ProfileScreen} />
       </Tab.Navigator>

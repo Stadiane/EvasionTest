@@ -7,61 +7,184 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { fetchHotels } from "../services/api";
+import { fetchHotels, fetchHotelDetails } from "../services/api";
+import * as Location from "expo-location"; // Importer Expo Location
 import HotelItem from "../components/HotelItem"; // Import du composant HotelItem
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
-  const [search, setSearch] = useState("");
+  const [filteredData, setFilteredData] = useState([]); // Liste filtrée des hôtels
+  const [search, setSearch] = useState(""); // Valeur de la recherche
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [favorites, setFavorites] = useState([]);
+  const [city, setCity] = useState("Chargement...");
 
+  // Tableau des types de logements
+  const housingTypes = ["Plage", "Patrimoine", "Campagne", "Montagne", "Ville"];
+
+  // Fonction pour récupérer la ville et le département
+  const getLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setCity("Permission refusée");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      // Appel à l'API OpenStreetMap pour récupérer la ville et le département
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+      );
+      const data = await response.json();
+
+      const ville =
+        data.address?.city ||
+        data.address?.town ||
+        data.address?.village ||
+        "Ville inconnue";
+      const codeDept = data.address?.postcode
+        ? data.address.postcode.slice(0, 2)
+        : "XX"; // Extrait les 2 premiers chiffres du code postal
+      const pays = data.address?.country || "Pays inconnu";
+
+      setCity(`${ville} (${codeDept}), ${pays}`);
+    } catch (error) {
+      console.error("Erreur lors de la récupération de la ville :", error);
+      setCity("Impossible de récupérer la ville");
+    }
+  };
+
+  // Charger les hôtels et leurs détails
   useEffect(() => {
+    getLocation();
     const loadHotels = async () => {
       try {
-        const hotels = await fetchHotels();
-        console.log("Données reçues :", hotels); // Debug
-        setData(hotels || []); // Évite `undefined`
+        const hotels = await fetchHotels(); // Récupérer la liste des hôtels
+        const hotelsWithDetails = await Promise.all(
+          hotels.map(async (hotel) => {
+            const details = await fetchHotelDetails(hotel.id); // Récupérer les détails de chaque hôtel
+            return { ...hotel, ...details }; // Fusionner les informations de base et les détails
+          })
+        );
+
+        setData(hotelsWithDetails); // Mettre à jour la liste des hôtels avec les détails
+        setFilteredData(hotelsWithDetails); // Mettre à jour la liste filtrée
       } catch (err) {
         setError("Impossible de récupérer les hôtels");
       } finally {
         setLoading(false);
       }
     };
+
     loadHotels();
+    loadFavorites(); // Charger les favoris au démarrage
   }, []);
+
+  // Charger les favoris depuis AsyncStorage
+  const loadFavorites = async () => {
+    const storedFavorites = await AsyncStorage.getItem("favorites");
+    setFavorites(storedFavorites ? JSON.parse(storedFavorites) : []);
+  };
+
+  // Fonction pour ajouter/enlever un hôtel des favoris
+  const toggleFavorite = async (hotel) => {
+    let updatedFavorites = [...favorites];
+
+    if (favorites.some((fav) => fav.id === hotel.id)) {
+      updatedFavorites = updatedFavorites.filter((fav) => fav.id !== hotel.id);
+    } else {
+      updatedFavorites.push(hotel);
+    }
+
+    await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+    setFavorites(updatedFavorites); // Mettre à jour l'état
+  };
+
+  //Fonction de recherche
+  const handleSearch = (text) => {
+    setSearch(text);
+
+    // Filtrer les hôtels par nom ou ville
+    const filtered = data.filter((hotel) => {
+      const nameMatch = hotel.name?.fr
+        .toLowerCase()
+        .includes(text.toLowerCase());
+      const cityMatch = hotel.address?.city
+        .toLowerCase()
+        .includes(text.toLowerCase());
+      return nameMatch || cityMatch; // Retourne vrai si le texte correspond à l'un des critères
+    });
+
+    // Mettre à jour la liste filtrée
+    setFilteredData(filteredData);
+  };
 
   if (loading) return <Text>Chargement...</Text>;
   if (error) return <Text>{error}</Text>;
 
   return (
     <View style={styles.container}>
-      {/* Barre de recherche avec icône à droite */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Rechercher ..."
-          value={search}
-          onChangeText={setSearch}
+      {/* Affichage de la ville avec icône */}
+      <View style={styles.locationContainer}>
+        <Icon
+          name="location-outline"
+          size={20}
+          color="white"
+          style={styles.locationIcon}
         />
-        <TouchableOpacity
-          onPress={() => console.log("Recherche lancée")}
-          style={styles.searchIcon}
-        >
-          <Icon name="search" size={20} color="#888" />
-        </TouchableOpacity>
-      </View>
+        <Text style={styles.locationText}>{city}</Text>
 
+        {/* Barre de recherche avec icône à droite */}
+        <View style={styles.searchContainer}>
+          {/*<Icon
+            name="search"
+            size={20}
+            color="#888"
+            style={styles.searchIcon}
+          />*/}
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Rechercher ..."
+            value={search}
+            onChangeText={handleSearch}
+          />
+        </View>
+      </View>
+      {/* Section des types de logements */}
+      <Text style={styles.Titre}>Type de logements</Text>
+      <View>
+        <FlatList
+          horizontal
+          data={housingTypes}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.typeButton}>
+              <Text style={styles.typeText}>{item}</Text>
+            </TouchableOpacity>
+          )}
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+      <Text style={styles.Titre}>Logements recommandés</Text>
+
+      {/* Liste filtrée des hôtels */}
       <FlatList
-        data={data}
+        data={filteredData}
         keyExtractor={(item) => item.id.toString()} // Utiliser `id` comme clé unique
         renderItem={({ item }) => (
           <HotelItem
             hotel={item} // Passer l'hôtel au composant HotelItem
-            onPress={(hotelId) =>
-              navigation.navigate("HotelDetail", { hotelId })
+            onPress={() =>
+              navigation.navigate("HotelDetail", { hotelId: item.id })
             }
+            onToggleFavorite={() => toggleFavorite(item)} // Mise à jour des favoris
+            isFavorite={favorites.some((fav) => fav.id === item.id)} // Vérifier si l'hôtel est en favoris
           />
         )}
       />
@@ -70,29 +193,59 @@ const HomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  Titre: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   container: {
     flex: 1,
+    padding: 1,
     backgroundColor: "#f5f5f5",
-    padding: 10,
   },
   searchContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end", // Aligne la barre de recherche à droite
+    width: "30%",
+    position: "relative",
     alignItems: "center", // Aligne l'icône verticalement avec la barre de recherche
-    marginBottom: 10,
   },
   searchBar: {
     backgroundColor: "#fff",
     paddingVertical: 8,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     borderRadius: 25,
-    width: "30%", // Ne pas laisser la barre trop longue
-    marginRight: 10, // Espacement entre la barre et l'icône
+    alignSelf: "flex-end", // Assure qu'elle est bien à droite
   },
-  searchIcon: {
-    padding: 5,
-    borderRadius: 25,
-    backgroundColor: "#eee", // Ajoute un fond à l'icône pour la rendre visible
+  /*searchIcon: {
+    position: "absolute",
+    paddingTop: "27%",
+    right: 15, 
+  },*/
+  locationContainer: {
+    flexDirection: "row",
+    height: "30%",
+    justifyContent: "left",
+    backgroundColor: "#498279", // Fond vert
+    padding: 60,
+  },
+  locationIcon: {
+    marginRight: 5, // Espacement entre l'icône et le texte
+  },
+  locationText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+  typeButton: {
+    backgroundColor: "#ddd",
+    margin: 5,
+    padding: 10,
+    width: "100",
+    height: "50",
+    borderRadius: 20,
+  },
+  typeText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
 
