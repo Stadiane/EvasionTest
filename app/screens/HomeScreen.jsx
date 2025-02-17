@@ -12,6 +12,7 @@ import * as Location from "expo-location"; // Importer Expo Location
 import HotelItem from "../components/HotelItem"; // Import du composant HotelItem
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/Ionicons";
+import TypeLogement from "../components/TypeLogement";
 
 const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
@@ -21,9 +22,6 @@ const HomeScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [city, setCity] = useState("Chargement...");
-
-  // Tableau des types de logements
-  const housingTypes = ["Plage", "Patrimoine", "Campagne", "Montagne", "Ville"];
 
   // Fonction pour récupérer la ville et le département
   const getLocation = async () => {
@@ -63,6 +61,7 @@ const HomeScreen = ({ navigation }) => {
   // Charger les hôtels et leurs détails
   useEffect(() => {
     getLocation();
+
     const loadHotels = async () => {
       try {
         const hotels = await fetchHotels(); // Récupérer la liste des hôtels
@@ -92,18 +91,18 @@ const HomeScreen = ({ navigation }) => {
     setFavorites(storedFavorites ? JSON.parse(storedFavorites) : []);
   };
 
-  // Fonction pour ajouter/enlever un hôtel des favoris
   const toggleFavorite = async (hotel) => {
     let updatedFavorites = [...favorites];
 
-    if (favorites.some((fav) => fav.id === hotel.id)) {
-      updatedFavorites = updatedFavorites.filter((fav) => fav.id !== hotel.id);
+    const index = updatedFavorites.findIndex((fav) => fav.id === hotel.id);
+    if (index === -1) {
+      updatedFavorites.push(hotel); // Si l'hôtel n'est pas encore un favori, on l'ajoute
     } else {
-      updatedFavorites.push(hotel);
+      updatedFavorites.splice(index, 1); // Si l'hôtel est déjà un favori, on le supprime
     }
 
-    await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-    setFavorites(updatedFavorites); // Mettre à jour l'état
+    setFavorites(updatedFavorites); // Mettre à jour les favoris dans l'état local
+    await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // Sauvegarder les favoris dans AsyncStorage
   };
 
   //Fonction de recherche
@@ -113,10 +112,15 @@ const HomeScreen = ({ navigation }) => {
     // Filtrer les hôtels par nom ou ville
     const filtered = data.filter((hotel) => {
       const name = hotel.name?.fr ? hotel.name.fr.toLowerCase() : "";
+      const address1 = hotel.address?.address1
+        ? hotel.address.address1.toLowerCase()
+        : "";
       const city = hotel.address?.city ? hotel.address.city.toLowerCase() : "";
 
       return (
-        name.includes(text.toLowerCase()) || city.includes(text.toLowerCase())
+        name.includes(text.toLowerCase()) ||
+        city.includes(text.toLowerCase()) ||
+        address1.includes(text.toLowerCase())
       );
     });
 
@@ -156,21 +160,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
       {/* Section des types de logements */}
-      <Text style={styles.Titre}>Type de logements</Text>
-      <View>
-        <FlatList
-          horizontal
-          data={housingTypes}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.typeButton}>
-              <Text style={styles.typeText}>{item}</Text>
-            </TouchableOpacity>
-          )}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
-      <Text style={styles.Titre}>Logements recommandés</Text>
+      <TypeLogement />
 
       {/* Liste filtrée des hôtels */}
       <FlatList
@@ -180,12 +170,18 @@ const HomeScreen = ({ navigation }) => {
           <HotelItem
             hotel={item} // Passer l'hôtel au composant HotelItem
             onPress={() =>
+              // Naviguer vers la page de détails de l'hôtel
               navigation.navigate("HotelDetail", { hotelId: item.id })
             }
             onToggleFavorite={() => toggleFavorite(item)} // Mise à jour des favoris
             isFavorite={favorites.some((fav) => fav.id === item.id)} // Vérifier si l'hôtel est en favoris
           />
         )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Aucun résultat</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -245,6 +241,16 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 16,
     color: "#333",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: "#888",
   },
 });
 

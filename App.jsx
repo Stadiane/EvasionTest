@@ -21,6 +21,7 @@ const HomeStack = () => (
       options={{ headerShown: false }} // Masque le header
     />
     <Stack.Screen name="HotelDetail" component={HotelDetailScreen} />
+    <Stack.Screen name="FavorisScreen" component={FavorisScreen} />
   </Stack.Navigator>
 );
 
