@@ -112,17 +112,16 @@ const HomeScreen = ({ navigation }) => {
 
     // Filtrer les hôtels par nom ou ville
     const filtered = data.filter((hotel) => {
-      const nameMatch = hotel.name?.fr
-        .toLowerCase()
-        .includes(text.toLowerCase());
-      const cityMatch = hotel.address?.city
-        .toLowerCase()
-        .includes(text.toLowerCase());
-      return nameMatch || cityMatch; // Retourne vrai si le texte correspond à l'un des critères
+      const name = hotel.name?.fr ? hotel.name.fr.toLowerCase() : "";
+      const city = hotel.address?.city ? hotel.address.city.toLowerCase() : "";
+
+      return (
+        name.includes(text.toLowerCase()) || city.includes(text.toLowerCase())
+      );
     });
 
     // Mettre à jour la liste filtrée
-    setFilteredData(filteredData);
+    setFilteredData(filtered);
   };
 
   if (loading) return <Text>Chargement...</Text>;
