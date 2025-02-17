@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Importer useNavigation
 import HotelItem from "../components/HotelItem";
 
-const FavorisScreen = ({ route }) => {
+const FavorisScreen = () => {
   const [favorites, setFavorites] = useState([]);
   const navigation = useNavigation();
-
-  const { toggleFavorite } = route.params || {}; // Récupérer la fonction passée par la navigation
 
   // Charger les favoris depuis AsyncStorage
   const loadFavorites = async () => {
@@ -23,9 +21,8 @@ const FavorisScreen = ({ route }) => {
     }, [])
   );
 
-  // Fonction qui retire un hôtel des favoris
+  // Fonction qui retire un hôtel des favoris et mettre à jour AsyncStorage
   const handleToggleFavorite = async (hotel) => {
-    toggleFavorite(hotel); // Supprime l'hôtel des favoris (côté HomeScreen aussi)
     const updatedFavorites = favorites.filter((fav) => fav.id !== hotel.id);
     setFavorites(updatedFavorites); // Mise à jour immédiate de l'UI
     await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // Sauvegarde dans AsyncStorage
@@ -45,7 +42,7 @@ const FavorisScreen = ({ route }) => {
             }}
             onToggleFavorite={() => {
               handleToggleFavorite(item);
-            }} // Permet de retirer l'hôtel des favoris
+            }} // Suppression en temps réel
             isFavorite={favorites.some((fav) => fav.id === item.id)}
           />
         )}

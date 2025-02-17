@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import { fetchHotels, fetchHotelDetails } from "../services/api";
 import * as Location from "expo-location"; // Importer Expo Location
 import HotelItem from "../components/HotelItem"; // Import du composant HotelItem
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/Ionicons";
 import TypeLogement from "../components/TypeLogement";
+import { useFocusEffect } from "@react-navigation/native"; // Import pour mise à jour en temps réel
 
 const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
@@ -58,32 +52,37 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  // Charger les hôtels et leurs détails
+  // Charger les hôtels, favoris et la localisation au démarrage
   useEffect(() => {
-    getLocation();
-
-    const loadHotels = async () => {
-      try {
-        const hotels = await fetchHotels(); // Récupérer la liste des hôtels
-        const hotelsWithDetails = await Promise.all(
-          hotels.map(async (hotel) => {
-            const details = await fetchHotelDetails(hotel.id); // Récupérer les détails de chaque hôtel
-            return { ...hotel, ...details }; // Fusionner les informations de base et les détails
-          })
-        );
-
-        setData(hotelsWithDetails); // Mettre à jour la liste des hôtels avec les détails
-        setFilteredData(hotelsWithDetails); // Mettre à jour la liste filtrée
-      } catch (err) {
-        setError("Impossible de récupérer les hôtels");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadHotels();
-    loadFavorites(); // Charger les favoris au démarrage
+    loadFavorites();
+    getLocation();
   }, []);
+
+  // Recharger les favoris à chaque retour sur l'écran
+  useFocusEffect(
+    React.useCallback(() => {
+      loadFavorites();
+    }, [])
+  );
+  const loadHotels = async () => {
+    try {
+      const hotels = await fetchHotels(); // Récupérer la liste des hôtels
+      const hotelsWithDetails = await Promise.all(
+        hotels.map(async (hotel) => {
+          const details = await fetchHotelDetails(hotel.id); // Récupérer les détails de chaque hôtel
+          return { ...hotel, ...details }; // Fusionner les informations de base et les détails
+        })
+      );
+
+      setData(hotelsWithDetails); // Mettre à jour la liste des hôtels avec les détails
+      setFilteredData(hotelsWithDetails); // Mettre à jour la liste filtrée
+    } catch (err) {
+      setError("Impossible de récupérer les hôtels");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Charger les favoris depuis AsyncStorage
   const loadFavorites = async () => {
@@ -91,6 +90,7 @@ const HomeScreen = ({ navigation }) => {
     setFavorites(storedFavorites ? JSON.parse(storedFavorites) : []);
   };
 
+  // Ajouter ou retirer un favori
   const toggleFavorite = async (hotel) => {
     let updatedFavorites = [...favorites];
 
@@ -183,6 +183,18 @@ const HomeScreen = ({ navigation }) => {
           </View>
         }
       />
+      {/* Bouton pour naviguer vers FavorisScreen en partageant toggleFavorite et favorites
+      <Text
+        style={styles.favorisButton}
+        onPress={() =>
+          navigation.navigate("FavorisScreen", {
+            toggleFavorite,
+            favorites, // Passer la liste des favoris pour actualisation instantanée
+          })
+        }
+      >
+        Voir mes favoris ❤️
+      </Text> */}
     </View>
   );
 };
