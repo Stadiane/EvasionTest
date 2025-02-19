@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import TypeLogement from "../components/TypeLogement";
 import { DeviceEventEmitter } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"; // Import pour mise à jour en temps réel
+import { Dimensions } from "react-native";
 
 const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
@@ -17,6 +18,8 @@ const HomeScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [city, setCity] = useState("Chargement...");
+
+  const { width } = Dimensions.get("window");
 
   // Fonction pour récupérer la ville et le département
   const getLocation = async () => {
@@ -165,17 +168,17 @@ const HomeScreen = ({ navigation }) => {
 
         {/* Barre de recherche avec icône à droite */}
         <View style={styles.searchContainer}>
-          {/*<Icon
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher ..."
+            value={search}
+            onChangeText={handleSearch}
+          />
+          <Icon
             name="search"
             size={20}
             color="#888"
             style={styles.searchIcon}
-          />*/}
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Rechercher ..."
-            value={search}
-            onChangeText={handleSearch}
           />
         </View>
       </View>
@@ -221,22 +224,34 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: "row",
-    width: "30%",
+    width: "100%",
+    justifyContent: "center",
+    marginTop: 10,
     position: "relative",
+    paddingHorizontal: 10, // Ajoute un peu d'espace sur les côtés
     alignItems: "center", // Aligne l'icône verticalement avec la barre de recherche
   },
-  searchBar: {
+  searchInput: {
+    flex: 1,
     backgroundColor: "#fff",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    alignSelf: "flex-end", // Assure qu'elle est bien à droite
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    elevation: 3, // Ombre pour un effet moderne
+    width: "90%", // Largeur dynamique (50% sur tablette, 90% sur mobile)
+    fontSize: 16,
+    color: "#333",
+    paddingLeft: 40,
   },
-  /*searchIcon: {
+  searchIcon: {
     position: "absolute",
-    paddingTop: "27%",
-    right: 15, 
-  },*/
+    left: 20,
+    top: "40%",
+    zIndex: 1,
+    transform: [{ translateY: -10 }],
+  },
   locationContainer: {
     flexDirection: "row",
     height: "30%",
