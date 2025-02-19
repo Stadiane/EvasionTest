@@ -6,6 +6,7 @@ import HotelItem from "../components/HotelItem"; // Import du composant HotelIte
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/Ionicons";
 import TypeLogement from "../components/TypeLogement";
+import { DeviceEventEmitter } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"; // Import pour mise à jour en temps réel
 
 const HomeScreen = ({ navigation }) => {
@@ -57,11 +58,27 @@ const HomeScreen = ({ navigation }) => {
     loadHotels();
     loadFavorites();
     getLocation();
+    const reloadFavorites = () => {
+      console.log("Mise à jour des favoris détectée !");
+      loadFavorites();
+    };
+
+    // Écouter l'événement au montage du composant
+    const subscription = DeviceEventEmitter.addListener(
+      "favoritesUpdated",
+      reloadFavorites
+    );
+
+    loadFavorites(); // Charger les favoris immédiatement
+
+    return () => {
+      subscription.remove(); // Nettoyer l'écouteur pour éviter les fuites mémoire
+    };
   }, []);
 
-  // Recharger les favoris à chaque retour sur l'écran
   useFocusEffect(
     React.useCallback(() => {
+      console.log("Focus sur l'écran, rechargement des favoris...");
       loadFavorites();
     }, [])
   );
@@ -87,7 +104,10 @@ const HomeScreen = ({ navigation }) => {
   // Charger les favoris depuis AsyncStorage
   const loadFavorites = async () => {
     const storedFavorites = await AsyncStorage.getItem("favorites");
-    setFavorites(storedFavorites ? JSON.parse(storedFavorites) : []);
+    const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+    // Vérification pour s'assurer que tous les objets dans les favoris ont une propriété id valide
+    const validFavorites = favorites.filter((fav) => fav && fav.id);
+    setFavorites(validFavorites);
   };
 
   // Ajouter ou retirer un favori
@@ -165,7 +185,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Liste filtrée des hôtels */}
       <FlatList
         data={filteredData}
-        keyExtractor={(item) => item.id.toString()} // Utiliser `id` comme clé unique
+        keyExtractor={(item) => (item.id ? item.id.toString() : "default")} // Utiliser `id` comme clé unique
         renderItem={({ item }) => (
           <HotelItem
             hotel={item} // Passer l'hôtel au composant HotelItem
@@ -174,7 +194,9 @@ const HomeScreen = ({ navigation }) => {
               navigation.navigate("HotelDetail", { hotelId: item.id })
             }
             onToggleFavorite={() => toggleFavorite(item)} // Mise à jour des favoris
-            isFavorite={favorites.some((fav) => fav.id === item.id)} // Vérifier si l'hôtel est en favoris
+            isFavorite={
+              item && item.id && favorites.some((fav) => fav.id === item.id)
+            } // Vérifier si l'hôtel est en favoris
           />
         )}
         ListEmptyComponent={
@@ -183,18 +205,6 @@ const HomeScreen = ({ navigation }) => {
           </View>
         }
       />
-      {/* Bouton pour naviguer vers FavorisScreen en partageant toggleFavorite et favorites
-      <Text
-        style={styles.favorisButton}
-        onPress={() =>
-          navigation.navigate("FavorisScreen", {
-            toggleFavorite,
-            favorites, // Passer la liste des favoris pour actualisation instantanée
-          })
-        }
-      >
-        Voir mes favoris ❤️
-      </Text> */}
     </View>
   );
 };
