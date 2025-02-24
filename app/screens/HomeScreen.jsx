@@ -20,6 +20,7 @@ const HomeScreen = ({ navigation }) => {
   const [city, setCity] = useState("Chargement...");
 
   const { width } = Dimensions.get("window");
+  const [favoritesKey, setFavoritesKey] = useState(0);
 
   // Fonction pour récupérer la ville et le département
   const getLocation = async () => {
@@ -111,6 +112,8 @@ const HomeScreen = ({ navigation }) => {
     // Vérification pour s'assurer que tous les objets dans les favoris ont une propriété id valide
     const validFavorites = favorites.filter((fav) => fav && fav.id);
     setFavorites(validFavorites);
+
+    setFavoritesKey((prev) => prev + 1); // Change la clé pour forcer le re-render
   };
 
   // Ajouter ou retirer un favori
@@ -187,6 +190,7 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Liste filtrée des hôtels */}
       <FlatList
+        key={favoritesKey} // clé pour forcer le re-render
         data={filteredData}
         keyExtractor={(item) => (item.id ? item.id.toString() : "default")} // Utiliser `id` comme clé unique
         renderItem={({ item }) => (
