@@ -1,7 +1,14 @@
 import React from "react";
-import { View, Text, ScrollView, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
-const HotelDetail = ({ hotel }) => (
+const HotelDetail = ({ hotel, navigation }) => (
   <ScrollView>
     <Text style={styles.title}>{hotel.title?.fr || "Titre indisponible"}</Text>
     <Text style={styles.subtitle}>{hotel.name?.fr || "Nom indisponible"}</Text>
@@ -38,6 +45,14 @@ const HotelDetail = ({ hotel }) => (
     <Text style={styles.sectionTitle}>Contact</Text>
     <Text>Email : {hotel.channel?.email}</Text>
     <Text>Téléphone : {hotel.channel?.phone}</Text>
+
+    {/* Bouton Réserver */}
+    <TouchableOpacity
+      style={styles.reserveButton}
+      onPress={() => navigation.navigate("BookingScreen", { hotel })}
+    >
+      <Text style={styles.reserveButtonText}>Réserver</Text>
+    </TouchableOpacity>
   </ScrollView>
 );
 
@@ -60,6 +75,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     marginTop: 10,
+  },
+  reserveButton: {
+    backgroundColor: "#498279",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 20,
+    marginHorizontal: 50,
+  },
+  reserveButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

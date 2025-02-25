@@ -70,7 +70,6 @@ const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
     // Mettre à jour immédiatement l'état `isFavorite`
     setIsFavorite(!isFavorite);
 
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Attendre 100ms
     // Notifier les autres écrans de la mise à jour
     DeviceEventEmitter.emit("favoritesUpdated");
   };
@@ -107,6 +106,7 @@ const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
       hotel={hotel}
       isFavorite={isFavorite}
       onToggleFavorite={handleToggleFavorite}
+      navigation={navigation}
     />
   );
 };

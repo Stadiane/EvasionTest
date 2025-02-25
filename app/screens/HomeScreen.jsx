@@ -86,6 +86,7 @@ const HomeScreen = ({ navigation }) => {
       loadFavorites();
     }, [])
   );
+
   const loadHotels = async () => {
     try {
       const hotels = await fetchHotels(); // Récupérer la liste des hôtels

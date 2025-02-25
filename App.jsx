@@ -6,6 +6,7 @@ import HomeScreen from "./app/screens/HomeScreen";
 import HotelDetailScreen from "./app/screens/HotelDetailScreen";
 import FavorisScreen from "./app/screens/FavorisScreen";
 import MessagesScreen from "./app/screens/MessagesScreen";
+import BookingScreen from "./app/screens/BookingScreen";
 import ProfileScreen from "./app/screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,6 +23,11 @@ const HomeStack = () => (
     />
     <Stack.Screen name="HotelDetail" component={HotelDetailScreen} />
     <Stack.Screen name="FavorisScreen" component={FavorisScreen} />
+    <Stack.Screen
+      name="BookingScreen"
+      component={BookingScreen}
+      options={{ title: "Réserver" }}
+    />
   </Stack.Navigator>
 );
 
