@@ -13,8 +13,10 @@ const BookingScreen = ({ route, navigation }) => {
   const { hotel } = route.params || {};
   const [arrivalDate, setArrivalDate] = useState(null);
   const [departureDate, setDepartureDate] = useState(null);
-  const [showArrivalPicker, setShowArrivalPicker] = useState(false);
-  const [showDeparturePicker, setShowDeparturePicker] = useState(false);
+  const [showPicker, setShowPicker] = useState({
+    arrival: false,
+    departure: false,
+  });
   const [guestType, setGuestType] = useState("Particulier");
   const [additionalService, setAdditionalService] = useState("");
   const [adults, setAdults] = useState(0);
@@ -22,6 +24,20 @@ const BookingScreen = ({ route, navigation }) => {
   const [babies, setBabies] = useState(0);
   const [animals, setAnimals] = useState(0);
   const [comment, setComment] = useState("");
+
+  const handleDateChange = (event, selectedDate, type) => {
+    setShowPicker({ ...showPicker, [type]: false });
+    if (selectedDate) {
+      if (type === "arrival") {
+        setArrivalDate(selectedDate);
+        if (!departureDate || selectedDate >= departureDate) {
+          setDepartureDate(null); // Reset si départ avant arrivée
+        }
+      } else {
+        setDepartureDate(selectedDate);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -33,18 +49,49 @@ const BookingScreen = ({ route, navigation }) => {
       {/* Dates d'arrivée et de départ */}
       <View style={styles.row}>
         <TouchableOpacity
-          onPress={() => setShowArrivalPicker(true)}
+          onPress={() => setShowPicker({ ...showPicker, arrival: true })}
           style={styles.datePicker}
         >
-          <Text>{arrivalDate ? arrivalDate.toDateString() : "Arrivée"}</Text>
+          <Text>
+            {arrivalDate ? arrivalDate.toLocaleDateString() : "Arrivée"}
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-          onPress={() => setShowDeparturePicker(true)}
-          style={styles.datePicker}
+          onPress={() =>
+            arrivalDate && setShowPicker({ ...showPicker, departure: true })
+          }
+          style={[styles.datePicker, !arrivalDate && styles.disabled]}
+          disabled={!arrivalDate}
         >
-          <Text>{departureDate ? departureDate.toDateString() : "Départ"}</Text>
+          <Text>
+            {departureDate ? departureDate.toLocaleDateString() : "Départ"}
+          </Text>
         </TouchableOpacity>
       </View>
+      {showPicker.arrival && (
+        <DateTimePicker
+          value={arrivalDate || new Date()}
+          mode="date"
+          display="default"
+          minimumDate={new Date()} // Empêcher les dates passées
+          onChange={(event, selectedDate) =>
+            handleDateChange(event, selectedDate, "arrival")
+          }
+        />
+      )}
+
+      {showPicker.departure && (
+        <DateTimePicker
+          value={departureDate || arrivalDate || new Date()}
+          mode="date"
+          display="default"
+          minimumDate={arrivalDate || new Date()} // Empêcher un départ avant l’arrivée
+          onChange={(event, selectedDate) =>
+            handleDateChange(event, selectedDate, "departure")
+          }
+        />
+      )}
 
       {/* Particulier / Professionnel */}
       <View style={styles.pickerContainer}>
@@ -157,35 +204,6 @@ const BookingScreen = ({ route, navigation }) => {
         value={comment}
         onChangeText={setComment}
       />
-      {/* DateTimePicker pour la date d'arrivée */}
-      {showArrivalPicker && (
-        <DateTimePicker
-          value={arrivalDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowArrivalPicker(false);
-            if (selectedDate) {
-              setArrivalDate(selectedDate);
-            }
-          }}
-        />
-      )}
-
-      {/* DateTimePicker pour la date de départ */}
-      {showDeparturePicker && (
-        <DateTimePicker
-          value={departureDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowDeparturePicker(false);
-            if (selectedDate) {
-              setDepartureDate(selectedDate);
-            }
-          }}
-        />
-      )}
 
       {/* Bouton de confirmation */}
       <TouchableOpacity
@@ -215,6 +233,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 5,
   },
+  disabled: { backgroundColor: "#ccc" },
   pickerContainer: { marginVertical: 10 },
   picker: { height: 50, backgroundColor: "#FFF" },
   input: {
