@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import HomeScreen from "./app/screens/HomeScreen";
+import SplashScreen from "./app/screens/SplashScreen";
 import HotelDetailScreen from "./app/screens/HotelDetailScreen";
 import FavorisScreen from "./app/screens/FavorisScreen";
 import MessagesScreen from "./app/screens/MessagesScreen";
@@ -15,6 +16,11 @@ const Stack = createStackNavigator();
 
 const HomeStack = () => (
   <Stack.Navigator>
+    <Stack.Screen
+      name="Splash"
+      component={SplashScreen}
+      options={{ headerShown: false }}
+    />
     {/* Masquer le titre "Accueil" dans le stack */}
     <Stack.Screen
       name="Acceuil"

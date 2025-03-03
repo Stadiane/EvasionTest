@@ -204,6 +204,19 @@ const BookingScreen = ({ route, navigation }) => {
         value={comment}
         onChangeText={setComment}
       />
+      {/* Calcul du montant basé sur le prix de l'API */}
+      {arrivalDate &&
+        departureDate &&
+        hotel?.pricings?.min_trip_amount_per_night && (
+          <Text style={styles.montant}>
+            Montant :{" "}
+            {(
+              ((departureDate - arrivalDate) / (1000 * 60 * 60 * 24)) *
+              hotel.pricings.min_trip_amount_per_night
+            ).toFixed(2)}{" "}
+            €
+          </Text>
+        )}
 
       {/* Bouton de confirmation */}
       <TouchableOpacity
@@ -254,6 +267,13 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
     marginHorizontal: 5,
+  },
+  montant: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
+    color: "#333",
   },
   confirmButton: {
     backgroundColor: "#498279",
