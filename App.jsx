@@ -9,6 +9,7 @@ import FavorisScreen from "./app/screens/FavorisScreen";
 import MessagesScreen from "./app/screens/MessagesScreen";
 import BookingScreen from "./app/screens/BookingScreen";
 import ProfileScreen from "./app/screens/ProfileScreen";
+import MapScreen from "./app/screens/MapScreen";
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
@@ -21,11 +22,10 @@ const HomeStack = () => (
       component={SplashScreen}
       options={{ headerShown: false }}
     />
-    {/* Masquer le titre "Accueil" dans le stack */}
     <Stack.Screen
       name="Acceuil"
       component={HomeScreen}
-      options={{ headerShown: false }} // Masque le header
+      options={{ headerShown: false }}
     />
     <Stack.Screen name="HotelDetail" component={HotelDetailScreen} />
     <Stack.Screen name="FavorisScreen" component={FavorisScreen} />
@@ -52,6 +52,8 @@ export default function App() {
               iconName = "chatbubble";
             } else if (route.name === "Compte") {
               iconName = "person";
+            } else if (route.name === "Carte") {
+              iconName = "map";
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
@@ -64,6 +66,10 @@ export default function App() {
           name="Acceuil"
           component={HomeStack}
           options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Carte"
+          component={MapScreen} // MapScreen est maintenant uniquement ici
         />
         <Tab.Screen name="Favoris" component={FavorisScreen} />
         <Tab.Screen name="Messages" component={MessagesScreen} />

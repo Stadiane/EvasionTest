@@ -4,7 +4,7 @@ const API_URL = "https://api.staging.cloudspire.io/partners/hotels";
 const DETAIL_API_URL = "https://api.staging.cloudspire.io/partners/hotels/";
 
 const TOKEN =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDEwMTU4MjUiLCJpYXQiOiIxNzQxMDE1ODI1IiwiZXhwIjoiMTc0MTAyMzAyNSJ9.C5VYX-gLqffOwGrOrTajT-GRw7A1lfRjJx_GrTHf_0o"; // Remplace par ton token
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDE2MTQ5MTkiLCJpYXQiOiIxNzQxNjE0OTE5IiwiZXhwIjoiMTc0MTYyMjExOSJ9.ZIS8Iga_VwC5vWFyOPXSMV075ppW1ysFjyHGuSKH8hk";
 
 export const fetchHotels = async () => {
   try {

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { fetchHotels, fetchHotelDetails } from "../services/api";
 import * as Location from "expo-location"; // Importer Expo Location
 import HotelItem from "../components/HotelItem"; // Import du composant HotelItem
@@ -188,7 +195,6 @@ const HomeScreen = ({ navigation }) => {
       </View>
       {/* Section des types de logements */}
       <TypeLogement />
-
       {/* Liste filtrée des hôtels */}
       <FlatList
         key={favoritesKey} // clé pour forcer le re-render
@@ -213,6 +219,13 @@ const HomeScreen = ({ navigation }) => {
           </View>
         }
       />
+      {/* Bouton pour aller à la carte */}
+      <TouchableOpacity
+        style={styles.mapButton}
+        onPress={() => navigation.navigate("Carte", { hotels: data })} // Envoi de `hotels`
+      >
+        <Text style={styles.mapButtonText}>Voir la carte</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -271,6 +284,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "white",
+  },
+  mapButton: {
+    backgroundColor: "#498279",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+    marginHorizontal: 20,
+  },
+  mapButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   typeButton: {
     backgroundColor: "#ddd",

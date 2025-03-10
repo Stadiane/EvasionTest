@@ -27,6 +27,19 @@ const HotelDetail = ({ hotel, navigation }) => (
       {hotel.address?.address1}, {hotel.address?.city}, {hotel.address?.zipcode}
     </Text>
 
+    <TouchableOpacity
+      style={styles.mapButton}
+      onPress={() =>
+        navigation.navigate("Carte", {
+          address: hotel.address?.address1,
+          city: hotel.address?.city,
+          zipcode: hotel.address?.zipcode,
+        })
+      }
+    >
+      <Text style={styles.mapButtonText}>Voir sur la carte</Text>
+    </TouchableOpacity>
+
     <ScrollView horizontal>
       {hotel.pictures?.map((pic, index) => (
         <Image
@@ -46,7 +59,6 @@ const HotelDetail = ({ hotel, navigation }) => (
     <Text>Email : {hotel.channel?.email}</Text>
     <Text>Téléphone : {hotel.channel?.phone}</Text>
 
-    {/* Bouton Réserver */}
     <TouchableOpacity
       style={styles.reserveButton}
       onPress={() => navigation.navigate("BookingScreen", { hotel })}
@@ -69,13 +81,15 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     alignSelf: "center",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  mapButton: {
+    backgroundColor: "#498279",
+    padding: 10,
+    borderRadius: 10,
     alignItems: "center",
-    paddingHorizontal: 10,
-    marginTop: 10,
+    marginVertical: 10,
+    marginHorizontal: 20,
   },
+  mapButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
   reserveButton: {
     backgroundColor: "#498279",
     padding: 15,
@@ -84,11 +98,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     marginHorizontal: 50,
   },
-  reserveButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  reserveButtonText: { color: "white", fontSize: 18, fontWeight: "bold" },
 });
 
 export default HotelDetail;
