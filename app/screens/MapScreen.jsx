@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Image } from "react-native";
+import HotelDetail from "../components/HotelDetail";
 import MapView, { Marker, Callout } from "react-native-maps";
 
 const MapScreen = ({ route, navigation }) => {
@@ -114,7 +115,7 @@ const MapScreen = ({ route, navigation }) => {
           const longitudeDelta = maxLongitude - minLongitude;
 
           // Ajuste un peu plus d'espace autour des hôtels pour éviter que la carte soit trop serrée
-          const zoomFactor = 1.2; // Ajustez ce facteur pour contrôler le niveau de zoom
+          const zoomFactor = 1.5; // Ajustez ce facteur pour contrôler le niveau de zoom
           setRegion({
             latitude: (maxLatitude + minLatitude) / 2, // Centre de la carte
             longitude: (maxLongitude + minLongitude) / 2, // Centre de la carte
@@ -166,10 +167,15 @@ const MapScreen = ({ route, navigation }) => {
               longitude: hotel.longitude,
             }}
           >
+            {/* Numérotation des hôtels */}
+            <View style={styles.markerContainer}>
+              <Text style={styles.markerText}>{index + 1}</Text>
+            </View>
             <Callout
-              onPress={() =>
-                navigation.navigate("HotelDetail", { hotelID: hotel.id })
-              }
+              onPress={() => {
+                console.log("Navigation vers l'hôtel ID :", hotel.id);
+                navigation.navigate("HotelDetail", { hotelId: hotel.id });
+              }}
             >
               <View style={styles.calloutContainer}>
                 {/* Image de l'hôtel */}
@@ -221,7 +227,12 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  calloutContainer: { alignItems: "center", padding: 5, maxWidth: 200 },
+  calloutContainer: {
+    alignItems: "center",
+    padding: 5,
+    maxWidth: 200,
+    maxHeight: 200,
+  },
   calloutImage: { width: 150, height: 100, borderRadius: 10, marginBottom: 5 },
   calloutTitle: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
   calloutPrice: { fontSize: 14, color: "#ff5722", textAlign: "center" },
@@ -231,6 +242,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#777",
     marginTop: 5,
+  },
+  markerContainer: {
+    backgroundColor: "#498279",
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  markerText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 20,
   },
 });
 

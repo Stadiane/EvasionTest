@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -79,17 +79,13 @@ const HomeScreen = ({ navigation }) => {
       "favoritesUpdated",
       reloadFavorites
     );
-
-    loadFavorites(); // Charger les favoris immédiatement
-
     return () => {
       subscription.remove(); // Nettoyer l'écouteur pour éviter les fuites mémoire
     };
   }, []);
 
   useFocusEffect(
-    React.useCallback(() => {
-      console.log("Focus sur l'écran, rechargement des favoris...");
+    useCallback(() => {
       loadFavorites();
     }, [])
   );
@@ -181,7 +177,8 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher ..."
+            placeholder="Où souhaitez-vous aller ?"
+            placeholderTextColor="#498279"
             value={search}
             onChangeText={handleSearch}
           />
@@ -229,7 +226,7 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 };
-
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   Titre: {
     fontSize: 18,
@@ -242,23 +239,25 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: "row",
-    width: "100%",
+    width: "135%",
     justifyContent: "center",
     marginTop: 10,
-    position: "relative",
-    paddingHorizontal: 10, // Ajoute un peu d'espace sur les côtés
-    alignItems: "center", // Aligne l'icône verticalement avec la barre de recherche
+    position: "absolute", // Positionner la barre de recherche en bas de la localisation
+    bottom: 30,
+    left: 10,
+    right: 10,
+    paddingHorizontal: 10,
+    alignItems: "center",
   },
   searchInput: {
     flex: 1,
     backgroundColor: "#fff",
-    flexDirection: "row",
-    alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 30,
     elevation: 3, // Ombre pour un effet moderne
-    width: "90%", // Largeur dynamique (50% sur tablette, 90% sur mobile)
+    width: width * 0.8, // 80% de la largeur de l'écran
+    maxWidth: 400, // Limiter la largeur maximale à 400 px pour les grands écrans
     fontSize: 16,
     color: "#333",
     paddingLeft: 40,
@@ -266,15 +265,17 @@ const styles = StyleSheet.create({
   searchIcon: {
     position: "absolute",
     left: 20,
-    top: "40%",
+    top: "30%",
     zIndex: 1,
+    color: "#498279",
     transform: [{ translateY: -10 }],
   },
   locationContainer: {
     flexDirection: "row",
-    height: "30%",
+    height: "25%",
     justifyContent: "left",
     backgroundColor: "#498279", // Fond vert
+    position: "relative",
     padding: 60,
   },
   locationIcon: {

@@ -1,20 +1,28 @@
-import React, { useEffect, useState, useLayoutEffect } from "react";
-import { ActivityIndicator, Text, StyleSheet, View } from "react-native";
+import React, {
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useContext,
+  useMemo,
+} from "react";
+import {
+  ActivityIndicator,
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { fetchHotelDetails } from "../services/api";
-import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import HotelDetail from "../components/HotelDetail";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
-import { DeviceEventEmitter } from "react-native";
+import { FavoritesContext } from "../context/FavoritesContext";
 
-const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
+const HotelDetailScreen = ({ route, navigation }) => {
   const { hotelId } = route.params || {};
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { favorites, toggleFavorite } = useContext(FavoritesContext);
 
   if (!hotelId) {
     console.error("hotelId est invalide :", hotelId);
@@ -40,46 +48,18 @@ const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
     loadHotelDetails();
   }, [hotelId]);
 
-  // Vérifier si l'hôtel est déjà en favoris
-  useFocusEffect(
-    useCallback(() => {
-      const checkIfFavorite = async () => {
-        const storedFavorites = await AsyncStorage.getItem("favorites");
-        const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-        setIsFavorite(favorites.some((fav) => fav.id === hotelId));
-      };
-      checkIfFavorite();
-    }, [hotelId])
+  // Vérifier si l'hôtel est en favoris en temps réel
+  const isFavorite = useMemo(
+    () => favorites.some((fav) => fav.id === hotelId),
+    [favorites, hotelId]
   );
-
-  // Ajouter / retirer un hôtel des favoris
-  const handleToggleFavorite = async () => {
-    const storedFavorites = await AsyncStorage.getItem("favorites");
-    let favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-
-    if (hotel) {
-      if (isFavorite) {
-        favorites = favorites.filter(
-          (fav) => fav.id.toString() !== hotelId.toString()
-        );
-      } else {
-        favorites.push(hotel);
-      }
-    }
-    await AsyncStorage.setItem("favorites", JSON.stringify(favorites));
-    // Mettre à jour immédiatement l'état `isFavorite`
-    setIsFavorite(!isFavorite);
-
-    // Notifier les autres écrans de la mise à jour
-    DeviceEventEmitter.emit("favoritesUpdated");
-  };
 
   // Ajouter le bouton cœur en haut à droite de l'écran
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
-          onPress={handleToggleFavorite}
+          onPress={() => toggleFavorite(hotel)}
           style={{ marginRight: 15 }}
         >
           <Ionicons
@@ -90,7 +70,8 @@ const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, isFavorite]);
+  }, [navigation, isFavorite, hotel]);
+
   if (loading) {
     return (
       <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
@@ -105,7 +86,7 @@ const HotelDetailScreen = ({ route, navigation, onToggleFavorite }) => {
     <HotelDetail
       hotel={hotel}
       isFavorite={isFavorite}
-      onToggleFavorite={handleToggleFavorite}
+      onToggleFavorite={() => toggleFavorite(hotel)}
       navigation={navigation}
     />
   );

@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { fetchHotels } from "../services/api"; // Assure-toi que cette fonction est correcte
+import Icon from "react-native-vector-icons/Ionicons"; // Import des icônes
+import { fetchHotels } from "../services/api"; // Assure-toi que cette fonction est correctement définie et exportée
 
+// Mapping des types de logement avec des icônes valides
 const typeMapping = {
-  G: "Gîte",
-  H: "Maison d'hôtes",
-  C: "Camping",
-  E: "Gîte d'étape",
-  P: "Gîte de groupe",
+  G: { label: "Gîte", icon: "home" }, // Gîte
+  H: { label: "Maison d'hôtes", icon: "bed" }, // Maison d'hôtes
+  C: { label: "Camping", icon: "leaf" }, // Camping
+  E: { label: "Gîte d'étape", icon: "bicycle" }, // Gîte d'étape
+  P: { label: "Gîte de groupe", icon: "people" }, // Gîte de groupe
 };
 
 const TypeLogement = () => {
@@ -23,14 +25,12 @@ const TypeLogement = () => {
     const fetchHousingTypes = async () => {
       try {
         const hotels = await fetchHotels(); // Récupérer la liste des hôtels
-
-        // Extraire les types uniques et les mapper avec leurs descriptions
-        const typesSet = new Set(hotels.map((hotel) => hotel.type));
+        const typesSet = new Set(hotels.map((hotel) => hotel.type)); // Extraire les types uniques
         const typesList = [...typesSet]
           .map((type) => typeMapping[type])
           .filter((type) => type !== undefined);
 
-        setHousingTypes(typesList);
+        setHousingTypes(typesList); // Mettre à jour les types de logements
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des types de logements :",
@@ -48,10 +48,13 @@ const TypeLogement = () => {
       <FlatList
         horizontal
         data={housingTypes}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.label}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.typeButton}>
-            <Text style={styles.typeText}>{item}</Text>
+            {/* Affichage de l'icône */}
+            <Icon name={item.icon} size={30} color="#498279" />
+            {/* Affichage du texte du type de logement */}
+            <Text style={styles.typeText}>{item.label}</Text>
           </TouchableOpacity>
         )}
         showsHorizontalScrollIndicator={false}
@@ -67,14 +70,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   typeButton: {
-    backgroundColor: "#ddd",
     margin: 5,
     padding: 10,
     borderRadius: 20,
+    alignItems: "center", // Aligne l'icône et le texte au centre
   },
   typeText: {
     fontSize: 16,
     color: "#333",
+    marginTop: 5, // Espacement entre l'icône et le texte
   },
 });
 
