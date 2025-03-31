@@ -12,7 +12,7 @@ const SplashScreen = ({ navigation }) => {
 
     // Aller à la page "Home" après 5 secondes
     const timer2 = setTimeout(() => {
-      navigation.replace("Acceuil");
+      navigation.replace("Accueil");
     }, 3000);
 
     // Nettoyage des timers au démontage du composant

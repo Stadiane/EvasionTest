@@ -69,8 +69,8 @@ const FavorisScreen = () => {
             <HotelItem
               hotel={item}
               onPress={() => {
-                // Naviguer vers "HotelDetail" en passant par "Acceuil" (HomeStack)
-                navigation.navigate("Acceuil", {
+                // Naviguer vers "HotelDetail" en passant par "Accueil" (HomeStack)
+                navigation.navigate("Accueil", {
                   screen: "HotelDetail",
                   params: { hotelId: item.id },
                 });

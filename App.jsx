@@ -9,12 +9,25 @@ import HotelDetailScreen from "./app/screens/HotelDetailScreen";
 import FavorisScreen from "./app/screens/FavorisScreen";
 import MessagesScreen from "./app/screens/MessagesScreen";
 import BookingScreen from "./app/screens/BookingScreen";
-import ProfileScreen from "./app/screens/ProfileScreen";
+import LoginScreen from "./app/screens/LoginScreen";
+import RegisterScreen from "./app/screens/RegisterScreen";
+import ResetPasswordScreen from "./app/screens/ResetPasswordScreen";
 import MapScreen from "./app/screens/MapScreen";
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+const AuthStack = () => (
+  <Stack.Navigator
+    initialRouteName="Login"
+    screenOptions={{ headerShown: false }}
+  >
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Register" component={RegisterScreen} />
+    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+  </Stack.Navigator>
+);
 
 const HomeStack = () => (
   <Stack.Navigator>
@@ -24,7 +37,7 @@ const HomeStack = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Acceuil"
+      name="Accueil"
       component={HomeScreen}
       options={{ headerShown: false }}
     />
@@ -47,7 +60,7 @@ export default function App() {
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
               let iconName;
-              if (route.name === "Acceuil") {
+              if (route.name === "Accueil") {
                 iconName = "home";
               } else if (route.name === "Favoris") {
                 iconName = "heart";
@@ -66,13 +79,17 @@ export default function App() {
           })}
         >
           <Tab.Screen
-            name="Acceuil"
+            name="Accueil"
             component={HomeStack}
             options={{ headerShown: false }}
           />
           <Tab.Screen name="Favoris" component={FavorisScreen} />
           <Tab.Screen name="Messages" component={MessagesScreen} />
-          <Tab.Screen name="Compte" component={ProfileScreen} />
+          <Tab.Screen
+            name="Compte"
+            component={AuthStack}
+            options={{ headerShown: false }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </FavoritesProvider>

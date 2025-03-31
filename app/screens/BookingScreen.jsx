@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  TextInput,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from "@expo/vector-icons";
 
 const BookingScreen = ({ route, navigation }) => {
   const { hotel } = route.params || {};
@@ -18,6 +20,7 @@ const BookingScreen = ({ route, navigation }) => {
     departure: false,
   });
   const [guestType, setGuestType] = useState("Particulier");
+  const [modalVisible, setModalVisible] = useState(false);
   const [additionalService, setAdditionalService] = useState("");
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
@@ -25,17 +28,16 @@ const BookingScreen = ({ route, navigation }) => {
   const [animals, setAnimals] = useState(0);
   const [comment, setComment] = useState("");
 
+  // Ouvrir et fermer la liste déroulante
+  const toggleModal = () => setModalVisible(!modalVisible);
+
   const handleDateChange = (event, selectedDate, type) => {
-    setShowPicker({ ...showPicker, [type]: false });
-    if (selectedDate) {
-      if (type === "arrival") {
-        setArrivalDate(selectedDate);
-        if (!departureDate || selectedDate >= departureDate) {
-          setDepartureDate(null); // Reset si départ avant arrivée
-        }
-      } else {
-        setDepartureDate(selectedDate);
-      }
+    if (type === "arrival") {
+      setArrivalDate(selectedDate);
+      setShowPicker({ arrival: false, departure: true }); // Ouvre automatiquement le départ
+    } else if (type === "departure") {
+      setDepartureDate(selectedDate);
+      setShowPicker({ arrival: false, departure: false });
     }
   };
 
@@ -49,7 +51,7 @@ const BookingScreen = ({ route, navigation }) => {
       {/* Dates d'arrivée et de départ */}
       <View style={styles.row}>
         <TouchableOpacity
-          onPress={() => setShowPicker({ ...showPicker, arrival: true })}
+          onPress={() => setShowPicker({ arrival: true, departure: false })}
           style={styles.datePicker}
         >
           <Text>
@@ -59,7 +61,7 @@ const BookingScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           onPress={() =>
-            arrivalDate && setShowPicker({ ...showPicker, departure: true })
+            arrivalDate && setShowPicker({ arrival: false, departure: true })
           }
           style={[styles.datePicker, !arrivalDate && styles.disabled]}
           disabled={!arrivalDate}
@@ -96,20 +98,60 @@ const BookingScreen = ({ route, navigation }) => {
       {/* Particulier / Professionnel */}
       <View style={styles.pickerContainer}>
         <Text>Type de client :</Text>
-        <Picker
-          selectedValue={guestType}
-          onValueChange={(itemValue) => setGuestType(itemValue)}
+        {/* TouchableOpacity pour afficher un rectangle avec une flèche */}
+        <TouchableOpacity
           style={styles.picker}
+          onPress={toggleModal} // Ouvrir la liste déroulante
         >
-          <Picker.Item label="Particulier" value="Particulier" />
-          <Picker.Item label="Professionnel" value="Professionnel" />
-        </Picker>
+          <Text style={styles.pickerText}>{guestType}</Text>
+          <Ionicons
+            name="caret-down-outline"
+            size={20}
+            color="#000"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </View>
+
+      {/* Liste déroulante */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={toggleModal}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={toggleModal} // Fermer la modal si on clique à l'extérieur
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalItem}
+              onPress={() => {
+                setGuestType("Particulier");
+                toggleModal(); // Fermer la modal après sélection
+              }}
+            >
+              <Text style={styles.modalText}>Particulier</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalItem}
+              onPress={() => {
+                setGuestType("Professionnel");
+                toggleModal(); // Fermer la modal après sélection
+              }}
+            >
+              <Text style={styles.modalText}>Professionnel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Services additionnels */}
       <TextInput
         style={styles.input}
         placeholder="Services additionnels"
+        placeholderTextColor="#ccc"
         value={additionalService}
         onChangeText={setAdditionalService}
       />
@@ -199,6 +241,7 @@ const BookingScreen = ({ route, navigation }) => {
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder="Commentaire"
+        placeholderTextColor="#ccc"
         multiline
         numberOfLines={4}
         value={comment}
@@ -247,8 +290,50 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   disabled: { backgroundColor: "#ccc" },
-  pickerContainer: { marginVertical: 10 },
-  picker: { height: 50, backgroundColor: "#FFF" },
+  pickerContainer: {
+    marginVertical: 15,
+    width: "100%", // Le conteneur prend toute la largeur disponible
+  },
+  picker: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "space-between",
+  },
+  pickerText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  icon: {
+    marginLeft: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fond transparent pour la modal
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  modalItem: {
+    paddingVertical: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    color: "#333",
+  },
   input: {
     backgroundColor: "#FFF",
     padding: 10,

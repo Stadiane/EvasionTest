@@ -4,35 +4,52 @@
     "slug": "Test",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/favicon.png",
+    "icon": "../assets/logo_Evasion_Location.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stadiane.EvasionTest",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/favicon.png",
+        "foregroundImage": "../assets/logo_Evasion_Location.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.stadiane.Test",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "../assets/logo_Evasion_Location.png"
     },
-
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "../assets/logo_Evasion_Location.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b824c495-14e3-4e0f-9ab0-76abe61a6158"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b824c495-14e3-4e0f-9ab0-76abe61a6158"
+    },
+    "owner": "stadiane"
   }
 }
