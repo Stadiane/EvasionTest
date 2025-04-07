@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,36 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../context/AuthContext";
 
 const RegisterScreen = ({ navigation }) => {
+  const { register } = useContext(AuthContext);
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [offersAccepted, setOffersAccepted] = useState(false); // Pour la case "offres"
   const [termsAccepted, setTermsAccepted] = useState(false); // Pour la case "conditions"
+
+  const handleRegister = async () => {
+    if (!nom || !email || !password || !confirmPassword) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Erreur", "Les mots de passe ne correspondent pas");
+      return;
+    }
+    try {
+      await register(nom, email, password); // Appel de register()
+      navigation.navigate("Accueil"); // Redirection après inscription
+    } catch (error) {
+      Alert.alert("Erreur", error.message);
+    }
+  };
 
   // Fonction pour gérer le changement de l'état des cases
   const toggleCheckbox = (type) => {
@@ -35,21 +59,34 @@ const RegisterScreen = ({ navigation }) => {
 
       {/* Formulaire */}
       <TextInput
+        placeholder="Nom complet"
+        placeholderTextColor="#ccc"
+        style={styles.input}
+        value={nom}
+        onChangeText={setNom}
+      />
+      <TextInput
         placeholder="Adresse de courriel"
         placeholderTextColor="#ccc"
         style={styles.input}
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         placeholder="Mot de passe"
         placeholderTextColor="#ccc"
         secureTextEntry
         style={styles.input}
+        value={password}
+        onChangeText={setPassword}
       />
       <TextInput
         placeholder="Confirmer le mot de passe"
         placeholderTextColor="#ccc"
         secureTextEntry
         style={styles.input}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
       {/* Cases à cocher */}
@@ -92,13 +129,16 @@ const RegisterScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Bouton Créer un compte */}
-      <TouchableOpacity style={styles.createAccountButton}>
+      <TouchableOpacity
+        style={styles.createAccountButton}
+        onPress={handleRegister}
+      >
         <Text style={styles.createAccountText}>Créer mon compte</Text>
       </TouchableOpacity>
 
       {/* Bouton "J’ai déjà un compte" avec une flèche */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("Login")}
+        onPress={() => navigation.navigate("LoginScreen")}
         style={styles.loginButton}
       >
         <Ionicons

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,29 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../context/AuthContext";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, route }) => {
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      if (route.params?.fromReservation) {
+        navigation.replace("BookingValidationScreen"); // Redirection vers validation après connexion
+      } else {
+        navigation.replace("HomeScreen"); // Sinon, redirection vers la page d'accueil
+      }
+    } catch (error) {
+      Alert.alert("Erreur", error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Logo */}
@@ -25,22 +44,28 @@ const LoginScreen = ({ navigation }) => {
       <TextInput
         placeholder="Adresse de courriel"
         placeholderTextColor="#ccc"
+        value={email}
+        onChangeText={setEmail}
         style={styles.input}
       />
       <TextInput
         placeholder="Mot de passe"
         placeholderTextColor="#ccc"
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
         style={styles.input}
       />
 
       {/* Bouton de connexion */}
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>Connexion à votre compte</Text>
       </TouchableOpacity>
 
       {/* Mot de passe oublié */}
-      <TouchableOpacity onPress={() => navigation.navigate("ResetPassword")}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ResetPasswordScreen")}
+      >
         <Text style={styles.forgotPassword}>Mot de passe oublié ?</Text>
       </TouchableOpacity>
 
@@ -60,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
       {/* Bouton Créer un compte */}
       <TouchableOpacity
         style={styles.createAccountButton}
-        onPress={() => navigation.navigate("Register")}
+        onPress={() => navigation.navigate("RegisterScreen")}
       >
         <View style={styles.buttonContent}>
           <Text style={styles.createAccountText}>Créer mon compte</Text>

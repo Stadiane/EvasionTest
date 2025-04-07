@@ -5,17 +5,12 @@ import React, {
   useContext,
   useMemo,
 } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import { ActivityIndicator, Text, View, TouchableOpacity } from "react-native";
 import { fetchHotelDetails } from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
 import HotelDetail from "../components/HotelDetail";
 import { FavoritesContext } from "../context/FavoritesContext";
+import styles from "../styles/HotelDetailStyles";
 
 const HotelDetailScreen = ({ route, navigation }) => {
   const { hotelId } = route.params || {};
@@ -24,16 +19,6 @@ const HotelDetailScreen = ({ route, navigation }) => {
   const [error, setError] = useState(null);
   const { favorites, toggleFavorite } = useContext(FavoritesContext);
 
-  if (!hotelId) {
-    console.error("hotelId est invalide :", hotelId);
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.error}>Erreur : ID d'hôtel invalide</Text>
-      </View>
-    );
-  }
-
-  // Charger les détails de l'hôtel
   useEffect(() => {
     const loadHotelDetails = async () => {
       try {
@@ -48,13 +33,11 @@ const HotelDetailScreen = ({ route, navigation }) => {
     loadHotelDetails();
   }, [hotelId]);
 
-  // Vérifier si l'hôtel est en favoris en temps réel
   const isFavorite = useMemo(
     () => favorites.some((fav) => fav.id === hotelId),
     [favorites, hotelId]
   );
 
-  // Ajouter le bouton cœur en haut à droite de l'écran
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -72,9 +55,19 @@ const HotelDetailScreen = ({ route, navigation }) => {
     });
   }, [navigation, isFavorite, hotel]);
 
+  if (!hotelId) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.error}>Erreur : ID d'hôtel invalide</Text>
+      </View>
+    );
+  }
+
   if (loading) {
     return (
-      <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#498279" />
+      </View>
     );
   }
 
@@ -91,10 +84,5 @@ const HotelDetailScreen = ({ route, navigation }) => {
     />
   );
 };
-
-const styles = StyleSheet.create({
-  loader: { flex: 1, justifyContent: "center", alignItems: "center" },
-  error: { color: "red", textAlign: "center", marginTop: 10 },
-});
 
 export default HotelDetailScreen;

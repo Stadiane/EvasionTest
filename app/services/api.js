@@ -2,10 +2,11 @@ import axios from "axios";
 
 const API_URL = "https://api.staging.cloudspire.io/partners/hotels";
 const DETAIL_API_URL = "https://api.staging.cloudspire.io/partners/hotels/";
+const CHECK_AVAILABILITY_URL =
+  "https://api.staging.cloudspire.io/partners/bookings/action/check";
 
 const TOKEN =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDM0MTYxODgiLCJpYXQiOiIxNzQzNDE2MTg4IiwiZXhwIjoiMTc0MzQyMzM4OCJ9.iKoScQPa-D4K9NQzyWiq4F7FedjGiio6Iz14DFbVdo0";
-
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDQwMjg2MjIiLCJpYXQiOiIxNzQ0MDI4NjIyIiwiZXhwIjoiMTc0NDAzNTgyMiJ9.OyliQ9yMV4xBOio3uAd7Z_gmlWNJScjbAW5T92WzBzE";
 export const fetchHotels = async () => {
   try {
     console.log("Tentative de récupération des hôtels...");
@@ -34,8 +35,33 @@ export const fetchHotelDetails = async (hotelId) => {
     throw new Error("Impossible de récupérer les détails de l'hôtel");
   }
 };
+
+export const checkAvailability = async (reservationData) => {
+  try {
+    const response = await axios.post(
+      CHECK_AVAILABILITY_URL,
+      { data: { reservations: [reservationData] }, meta: {} },
+      {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la vérification de la disponibilité",
+      error.response?.data || error.message
+    );
+    throw new Error("Impossible de vérifier la disponibilité");
+  }
+};
+
 const api = {
   fetchHotels,
   fetchHotelDetails,
+  checkAvailability,
 };
 export default api;

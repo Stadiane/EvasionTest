@@ -1,29 +1,26 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import styles from "../styles/HotelDetailStyles";
 
 const HotelDetail = ({ hotel, navigation }) => (
-  <ScrollView>
+  <ScrollView contentContainerStyle={styles.container}>
     <Text style={styles.title}>{hotel.title?.fr || "Titre indisponible"}</Text>
     <Text style={styles.subtitle}>{hotel.name?.fr || "Nom indisponible"}</Text>
-    <Text>
-      Capacité : {hotel.min_capacity} - {hotel.max_capacity} pers.
-    </Text>
-    <Text>Surface : {hotel.surface} m²</Text>
+
+    <View style={styles.infoRow}>
+      <Text style={styles.infoText}>
+        Capacité : {hotel.min_capacity} - {hotel.max_capacity} pers.
+      </Text>
+      <Text style={styles.infoText}>Surface : {hotel.surface} m²</Text>
+    </View>
 
     <Text style={styles.sectionTitle}>Description</Text>
-    <Text>
+    <Text style={styles.paragraph}>
       {hotel.descriptions?.about?.fr || "Pas de description disponible"}
     </Text>
 
     <Text style={styles.sectionTitle}>Adresse</Text>
-    <Text>
+    <Text style={styles.paragraph}>
       {hotel.address?.address1}, {hotel.address?.city}, {hotel.address?.zipcode}
     </Text>
 
@@ -34,7 +31,7 @@ const HotelDetail = ({ hotel, navigation }) => (
       <Text style={styles.mapButtonText}>Voir sur la carte</Text>
     </TouchableOpacity>
 
-    <ScrollView horizontal>
+    <ScrollView horizontal style={styles.imageScroll}>
       {hotel.pictures?.map((pic, index) => (
         <Image
           key={index}
@@ -46,12 +43,16 @@ const HotelDetail = ({ hotel, navigation }) => (
     </ScrollView>
 
     <Text style={styles.sectionTitle}>Tarifs</Text>
-    <Text>À partir de {hotel.pricings?.min_trip_amount}€ le séjour</Text>
-    <Text>À partir de {hotel.pricings?.min_trip_amount_per_night}€ / nuit</Text>
+    <Text style={styles.paragraph}>
+      À partir de {hotel.pricings?.min_trip_amount}€ le séjour
+    </Text>
+    <Text style={styles.paragraph}>
+      À partir de {hotel.pricings?.min_trip_amount_per_night}€ / nuit
+    </Text>
 
     <Text style={styles.sectionTitle}>Contact</Text>
-    <Text>Email : {hotel.channel?.email}</Text>
-    <Text>Téléphone : {hotel.channel?.phone}</Text>
+    <Text style={styles.paragraph}>Email : {hotel.channel?.email}</Text>
+    <Text style={styles.paragraph}>Téléphone : {hotel.channel?.phone}</Text>
 
     <TouchableOpacity
       style={styles.reserveButton}
@@ -61,38 +62,5 @@ const HotelDetail = ({ hotel, navigation }) => (
     </TouchableOpacity>
   </ScrollView>
 );
-
-const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: "bold", textAlign: "center" },
-  subtitle: { fontSize: 18, color: "gray", textAlign: "center" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
-  detailImage: {
-    width: 300,
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#fff",
-    alignSelf: "center",
-  },
-  mapButton: {
-    backgroundColor: "#498279",
-    padding: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    marginVertical: 10,
-    marginHorizontal: 20,
-  },
-  mapButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-  reserveButton: {
-    backgroundColor: "#498279",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginVertical: 20,
-    marginHorizontal: 50,
-  },
-  reserveButtonText: { color: "white", fontSize: 18, fontWeight: "bold" },
-});
 
 export default HotelDetail;

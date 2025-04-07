@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,12 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../context/AuthContext";
+import styles from "../styles/BookingScreenStyles";
 
 const BookingScreen = ({ route, navigation }) => {
   const { hotel } = route.params || {};
+  const { user } = useContext(AuthContext);
   const [arrivalDate, setArrivalDate] = useState(null);
   const [departureDate, setDepartureDate] = useState(null);
   const [showPicker, setShowPicker] = useState({
@@ -38,6 +41,16 @@ const BookingScreen = ({ route, navigation }) => {
     } else if (type === "departure") {
       setDepartureDate(selectedDate);
       setShowPicker({ arrival: false, departure: false });
+    }
+  };
+
+  const handleReservation = () => {
+    if (!user) {
+      // Si l'utilisateur n'est pas connecté, on l'envoie vers Login
+      navigation.navigate("LoginScreen", { fromReservation: true });
+    } else {
+      // Sinon, il peut aller valider et payer ensuite
+      navigation.navigate("BookingValidationScreen");
     }
   };
 
@@ -165,14 +178,15 @@ const BookingScreen = ({ route, navigation }) => {
               onPress={() => setAdults(Math.max(0, adults - 1))}
               style={styles.counterButton}
             >
-              <Text>-</Text>
+              <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
+
             <Text>{adults}</Text>
             <TouchableOpacity
               onPress={() => setAdults(adults + 1)}
               style={styles.counterButton}
             >
-              <Text>+</Text>
+              <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -184,14 +198,15 @@ const BookingScreen = ({ route, navigation }) => {
               onPress={() => setChildren(Math.max(0, children - 1))}
               style={styles.counterButton}
             >
-              <Text>-</Text>
+              <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
-            <Text>{children}</Text>
+
+            <Text>{adults}</Text>
             <TouchableOpacity
               onPress={() => setChildren(children + 1)}
               style={styles.counterButton}
             >
-              <Text>+</Text>
+              <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -205,14 +220,15 @@ const BookingScreen = ({ route, navigation }) => {
               onPress={() => setBabies(Math.max(0, babies - 1))}
               style={styles.counterButton}
             >
-              <Text>-</Text>
+              <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
-            <Text>{babies}</Text>
+
+            <Text>{adults}</Text>
             <TouchableOpacity
               onPress={() => setBabies(babies + 1)}
               style={styles.counterButton}
             >
-              <Text>+</Text>
+              <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -224,14 +240,15 @@ const BookingScreen = ({ route, navigation }) => {
               onPress={() => setAnimals(Math.max(0, animals - 1))}
               style={styles.counterButton}
             >
-              <Text>-</Text>
+              <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
-            <Text>{animals}</Text>
+
+            <Text>{adults}</Text>
             <TouchableOpacity
               onPress={() => setAnimals(animals + 1)}
               style={styles.counterButton}
             >
-              <Text>+</Text>
+              <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -264,110 +281,11 @@ const BookingScreen = ({ route, navigation }) => {
       {/* Bouton de confirmation */}
       <TouchableOpacity
         style={styles.confirmButton}
-        onPress={() => alert("Réservation confirmée !")}
+        onPress={handleReservation}
       >
         <Text style={styles.confirmButtonText}>Confirmer la réservation</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#F8F8F8" },
-  title: { fontSize: 24, fontWeight: "bold", textAlign: "center" },
-  hotelName: { fontSize: 18, marginVertical: 10, textAlign: "center" },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 10,
-  },
-  datePicker: {
-    flex: 1,
-    backgroundColor: "#FFF",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  disabled: { backgroundColor: "#ccc" },
-  pickerContainer: {
-    marginVertical: 15,
-    width: "100%", // Le conteneur prend toute la largeur disponible
-  },
-  picker: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    justifyContent: "space-between",
-  },
-  pickerText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  icon: {
-    marginLeft: 5,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fond transparent pour la modal
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  modalItem: {
-    paddingVertical: 10,
-  },
-  modalText: {
-    fontSize: 18,
-    color: "#333",
-  },
-  input: {
-    backgroundColor: "#FFF",
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  textArea: { height: 100, textAlignVertical: "top" },
-  counterContainer: { alignItems: "center", flex: 1 },
-  counter: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  counterButton: {
-    backgroundColor: "#DDD",
-    padding: 5,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  montant: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 10,
-    color: "#333",
-  },
-  confirmButton: {
-    backgroundColor: "#498279",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  confirmButtonText: { color: "white", fontSize: 18, fontWeight: "bold" },
-});
-
 export default BookingScreen;
