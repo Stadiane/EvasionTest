@@ -36,6 +36,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#333",
   },
+  amenitiesContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  amenityItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFF5F3",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  amenityText: {
+    fontSize: 14,
+    color: "#2C6E49",
+    flexShrink: 1,
+    flexWrap: "wrap",
+  },
+  amenityIcon: {
+    marginRight: 6,
+  },
   paragraph: {
     fontSize: 16,
     color: "#444",
@@ -85,6 +107,33 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 18,
+  },
+  counterButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#eee",
+    borderRadius: 5,
+  },
+  capacityWarning: {
+    color: "#c0392b",
+    fontWeight: "bold",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  dropdownList: {
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
   },
 });
 

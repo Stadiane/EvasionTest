@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import styles from "../styles/HotelDetailStyles";
+import { iconByAmenityId } from "../constants/icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const HotelDetail = ({ hotel, navigation }) => (
   <ScrollView contentContainerStyle={styles.container}>
@@ -13,6 +15,39 @@ const HotelDetail = ({ hotel, navigation }) => (
       </Text>
       <Text style={styles.infoText}>Surface : {hotel.surface} m²</Text>
     </View>
+
+    {/* Spécificités (amenities) */}
+    {hotel.amenities?.length > 0 && hotel.amenitiesList && (
+      <>
+        <Text style={styles.sectionTitle}>Spécificités</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: 10 }}
+        >
+          <View style={styles.amenitiesContainer}>
+            {hotel.amenities.map(({ amenity_id }) => {
+              const match = hotel.amenitiesList.find(
+                (a) => a.id === Number(amenity_id)
+              );
+              const iconName = iconByAmenityId[Number(amenity_id)];
+
+              return match && iconName ? (
+                <View key={amenity_id} style={styles.amenityItem}>
+                  <Ionicons
+                    name={iconName}
+                    size={18}
+                    color="#333"
+                    style={styles.amenityIcon}
+                  />
+                  <Text style={styles.amenityText}>{match.name?.fr}</Text>
+                </View>
+              ) : null;
+            })}
+          </View>
+        </ScrollView>
+      </>
+    )}
 
     <Text style={styles.sectionTitle}>Description</Text>
     <Text style={styles.paragraph}>

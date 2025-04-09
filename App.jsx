@@ -80,6 +80,11 @@ const HomeStack = () => (
       component={BookingValidationScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="PaymentScreen"
+      component={PaymentScreen}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 

@@ -6,7 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import { ActivityIndicator, Text, View, TouchableOpacity } from "react-native";
-import { fetchHotelDetails } from "../services/api";
+import { fetchHotelDetails, fetchAmenities } from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
 import HotelDetail from "../components/HotelDetail";
 import { FavoritesContext } from "../context/FavoritesContext";
@@ -23,8 +23,15 @@ const HotelDetailScreen = ({ route, navigation }) => {
     const loadHotelDetails = async () => {
       try {
         const hotelDetails = await fetchHotelDetails(hotelId);
-        setHotel(hotelDetails);
+        const amenitiesList = await fetchAmenities();
+
+        // debug
+        console.log("Hotel amenities:", hotelDetails.amenities);
+        console.log("Fetched amenitiesList:", amenitiesList);
+
+        setHotel({ ...hotelDetails, amenitiesList });
       } catch (err) {
+        console.error(err);
         setError("Impossible de récupérer les détails de l'hôtel");
       } finally {
         setLoading(false);

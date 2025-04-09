@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Modal,
   TextInput,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
@@ -30,6 +31,53 @@ const BookingScreen = ({ route, navigation }) => {
   const [babies, setBabies] = useState(0);
   const [animals, setAnimals] = useState(0);
   const [comment, setComment] = useState("");
+  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false);
+  const [selectedServices, setSelectedServices] = useState([]);
+
+  const totalGuests = adults + children + babies;
+  const canAddMore = () => totalGuests < hotel.max_capacity;
+
+  // Mapping des types de service en texte lisible
+  const serviceTypeLabels = {
+    cleaning: "Ménage",
+    pets: "Animaux",
+    sheets: "Draps",
+    towels: "Serviettes",
+    breakfast: "Petit déjeuner",
+    baby: "Équipement bébé",
+    wood: "Bois de chauffage",
+    electricity: "Électricité",
+    heating: "Chauffage",
+    bed_made: "Lits faits à l'arrivée",
+    wifi: "Wifi",
+    spa: "Accès spa",
+    sauna: "Sauna",
+    jacuzzi: "Jacuzzi",
+    hammam: "Hammam",
+    air_conditioning: "Climatisation",
+    final_cleaning: "Ménage de fin de séjour",
+    parking: "Parking",
+    animals: "Animaux acceptés",
+    arrival_kit: "Kit de bienvenue",
+    extra_beds: "Lits supplémentaires",
+    towels_rental: "Location de serviettes",
+    sheets_rental: "Location de draps",
+    baby_kit: "Kit bébé",
+    lunch: "Déjeuner",
+    dinner: "Dîner",
+    half_board: "Demi-pension",
+    full_board: "Pension complète",
+    bike_rental: "Location de vélo",
+    car_rental: "Location de voiture",
+    end_of_stay_cleaning: "Ménage fin de séjour",
+    garage: "Garage",
+    room_rental: "location de la chambre",
+    barbecue: "Barbecue",
+    breakfast_basket: "Panier petit-déjeuner",
+    firewood: "Bois fourni",
+    late_checkout: "Départ tardif",
+    early_checkin: "Arrivée anticipée",
+  };
 
   // Ouvrir et fermer la liste déroulante
   const toggleModal = () => setModalVisible(!modalVisible);
@@ -55,12 +103,11 @@ const BookingScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Réservation pour :</Text>
       <Text style={styles.hotelName}>
         {hotel?.title?.fr || "Hôtel inconnu"}
       </Text>
-
       {/* Dates d'arrivée et de départ */}
       <View style={styles.row}>
         <TouchableOpacity
@@ -95,7 +142,6 @@ const BookingScreen = ({ route, navigation }) => {
           }
         />
       )}
-
       {showPicker.departure && (
         <DateTimePicker
           value={departureDate || arrivalDate || new Date()}
@@ -107,7 +153,6 @@ const BookingScreen = ({ route, navigation }) => {
           }
         />
       )}
-
       {/* Particulier / Professionnel */}
       <View style={styles.pickerContainer}>
         <Text>Type de client :</Text>
@@ -125,7 +170,6 @@ const BookingScreen = ({ route, navigation }) => {
           />
         </TouchableOpacity>
       </View>
-
       {/* Liste déroulante */}
       <Modal
         visible={modalVisible}
@@ -159,16 +203,66 @@ const BookingScreen = ({ route, navigation }) => {
           </View>
         </TouchableOpacity>
       </Modal>
-
       {/* Services additionnels */}
-      <TextInput
-        style={styles.input}
-        placeholder="Services additionnels"
-        placeholderTextColor="#ccc"
-        value={additionalService}
-        onChangeText={setAdditionalService}
-      />
+      <View style={styles.pickerContainer}>
+        <Text>Services additionnels :</Text>
+        <TouchableOpacity
+          style={styles.picker}
+          onPress={() => setServiceDropdownOpen(!serviceDropdownOpen)}
+        >
+          <Text style={styles.pickerText}>
+            {selectedServices.length > 0
+              ? selectedServices
+                  .map((s) => serviceTypeLabels[s.type] || s.type)
+                  .join(", ")
+              : "-- Choisir un ou plusieurs services --"}
+          </Text>
+          <Ionicons
+            name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
+            size={20}
+            color="#000"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      </View>
+      {serviceDropdownOpen && hotel.services?.length > 0 && (
+        <View style={styles.dropdownList}>
+          {hotel.services.map((service) => {
+            const isSelected = selectedServices.some(
+              (s) => s.id === service.id
+            );
 
+            const toggleSelection = () => {
+              if (isSelected) {
+                setSelectedServices((prev) =>
+                  prev.filter((s) => s.id !== service.id)
+                );
+              } else {
+                setSelectedServices((prev) => [...prev, service]);
+              }
+            };
+
+            return (
+              <TouchableOpacity
+                key={service.id}
+                style={styles.dropdownItem}
+                onPress={toggleSelection}
+              >
+                <Ionicons
+                  name={isSelected ? "checkbox-outline" : "square-outline"}
+                  size={20}
+                  color="#498279"
+                  style={{ marginRight: 8 }}
+                />
+                <Text>
+                  {serviceTypeLabels[service.type] || service.type} -{" "}
+                  {service.amount}€
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
       {/* Nombre de personnes */}
       <View style={styles.row}>
         <View style={styles.counterContainer}>
@@ -183,8 +277,9 @@ const BookingScreen = ({ route, navigation }) => {
 
             <Text>{adults}</Text>
             <TouchableOpacity
-              onPress={() => setAdults(adults + 1)}
+              onPress={() => canAddMore() && setAdults(adults + 1)}
               style={styles.counterButton}
+              disabled={!canAddMore()}
             >
               <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
@@ -201,17 +296,17 @@ const BookingScreen = ({ route, navigation }) => {
               <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
 
-            <Text>{adults}</Text>
+            <Text>{children}</Text>
             <TouchableOpacity
-              onPress={() => setChildren(children + 1)}
+              onPress={() => canAddMore() && setChildren(children + 1)}
               style={styles.counterButton}
+              disabled={!canAddMore()}
             >
               <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
-
       <View style={styles.row}>
         <View style={styles.counterContainer}>
           <Text>Bébés</Text>
@@ -223,10 +318,11 @@ const BookingScreen = ({ route, navigation }) => {
               <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
 
-            <Text>{adults}</Text>
+            <Text>{babies}</Text>
             <TouchableOpacity
-              onPress={() => setBabies(babies + 1)}
+              onPress={() => canAddMore() && setBabies(babies + 1)}
               style={styles.counterButton}
+              disabled={!canAddMore()}
             >
               <Text style={styles.counterButtonText}>+</Text>
             </TouchableOpacity>
@@ -243,7 +339,7 @@ const BookingScreen = ({ route, navigation }) => {
               <Text style={styles.counterButtonText}>-</Text>
             </TouchableOpacity>
 
-            <Text>{adults}</Text>
+            <Text>{animals}</Text>
             <TouchableOpacity
               onPress={() => setAnimals(animals + 1)}
               style={styles.counterButton}
@@ -253,6 +349,11 @@ const BookingScreen = ({ route, navigation }) => {
           </View>
         </View>
       </View>
+      {totalGuests >= hotel.max_capacity && (
+        <Text style={styles.capacityWarning}>
+          Vous avez atteint la capacité maximale dans ce logement
+        </Text>
+      )}
 
       {/* Commentaire */}
       <TextInput
@@ -264,20 +365,23 @@ const BookingScreen = ({ route, navigation }) => {
         value={comment}
         onChangeText={setComment}
       />
-      {/* Calcul du montant basé sur le prix de l'API */}
+      {/* Calcul du montant total avec services */}
       {arrivalDate &&
         departureDate &&
         hotel?.pricings?.min_trip_amount_per_night && (
           <Text style={styles.montant}>
             Montant :{" "}
             {(
-              ((departureDate - arrivalDate) / (1000 * 60 * 60 * 24)) *
-              hotel.pricings.min_trip_amount_per_night
+              ((departureDate - arrivalDate) / (1000 * 60 * 60 * 24) || 1) *
+                hotel.pricings.min_trip_amount_per_night +
+              selectedServices.reduce(
+                (sum, service) => sum + (Number(service.amount) || 0),
+                0
+              )
             ).toFixed(2)}{" "}
             €
           </Text>
         )}
-
       {/* Bouton de confirmation */}
       <TouchableOpacity
         style={styles.confirmButton}
@@ -285,7 +389,7 @@ const BookingScreen = ({ route, navigation }) => {
       >
         <Text style={styles.confirmButtonText}>Confirmer la réservation</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 export default BookingScreen;

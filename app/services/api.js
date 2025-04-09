@@ -2,11 +2,13 @@ import axios from "axios";
 
 const API_URL = "https://api.staging.cloudspire.io/partners/hotels";
 const DETAIL_API_URL = "https://api.staging.cloudspire.io/partners/hotels/";
+const AMENITIES_API_URL =
+  "https://api.staging.cloudspire.io/partners/hotels/amenities";
 const CHECK_AVAILABILITY_URL =
   "https://api.staging.cloudspire.io/partners/bookings/action/check";
 
 const TOKEN =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDQwMjg2MjIiLCJpYXQiOiIxNzQ0MDI4NjIyIiwiZXhwIjoiMTc0NDAzNTgyMiJ9.OyliQ9yMV4xBOio3uAd7Z_gmlWNJScjbAW5T92WzBzE";
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJjMWMxYTQ3ZTJiNWQ0ZWYzOGIxNzAwMjg5N2NkY2ZjOSIsInVzZXJDbGFzcyI6IlBhcnRuZXIiLCJ1c2VyUmVmIjoiUDI1MDAwMTM0NyIsIm5iZiI6IjE3NDQxOTU3OTQiLCJpYXQiOiIxNzQ0MTk1Nzk0IiwiZXhwIjoiMTc0NDIwMjk5NCJ9.MuQwAt-1IK7prIBhvm6_ZrZeMPTOYox-LUM4hGrjk94";
 export const fetchHotels = async () => {
   try {
     console.log("Tentative de récupération des hôtels...");
@@ -33,6 +35,18 @@ export const fetchHotelDetails = async (hotelId) => {
     return response.data.data;
   } catch (error) {
     throw new Error("Impossible de récupérer les détails de l'hôtel");
+  }
+};
+
+export const fetchAmenities = async () => {
+  try {
+    const response = await axios.get(AMENITIES_API_URL, {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des amenities :", error);
+    throw new Error("Impossible de récupérer les spécificités");
   }
 };
 
