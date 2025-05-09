@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Image } from "react-native";
 import HotelDetail from "../components/HotelDetail";
 import MapView, { Marker, Callout } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
 
 const MapScreen = ({ route, navigation }) => {
-  const { hotels = [] } = route.params || {}; // Utilisation de 'hotels' directement
+  const { hotels = [], focusHotelId } = route.params || {}; // Utilisation de 'hotels' directement
   const { hotelID } = route.params; // Récupère l'ID de l'hôtel
   const [loading, setLoading] = useState(true);
   const [hotelLocations, setHotelLocations] = useState([]);
@@ -125,6 +126,20 @@ const MapScreen = ({ route, navigation }) => {
         }
 
         setHotelLocations(adjustedLocations);
+        // Pour centrer sur un hôtel spécifique
+        if (focusHotelId) {
+          const focusedHotel = adjustedLocations.find(
+            (h) => h.id === focusHotelId
+          );
+          if (focusedHotel) {
+            setRegion({
+              latitude: focusedHotel.latitude,
+              longitude: focusedHotel.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            });
+          }
+        }
         setLoading(false);
 
         // Log du nombre d'hôtels affichés sur la carte
@@ -167,10 +182,18 @@ const MapScreen = ({ route, navigation }) => {
               longitude: hotel.longitude,
             }}
           >
-            {/* Numérotation des hôtels */}
-            <View style={styles.markerContainer}>
-              <Text style={styles.markerText}>{index + 1}</Text>
-            </View>
+            {/* Numérotation des hôtels et Affiche une icône simple si un seul hôtel est visible */}
+            {hotelLocations.length === 1 ? (
+              <Ionicons
+                name="location-sharp"
+                size={60}
+                color="rgb(189, 8, 8)"
+              />
+            ) : (
+              <View style={styles.markerContainer}>
+                <Text style={styles.markerText}>{index + 1}</Text>
+              </View>
+            )}
             <Callout
               onPress={() => {
                 console.log("Navigation vers l'hôtel ID :", hotel.id);

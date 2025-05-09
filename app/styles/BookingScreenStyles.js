@@ -144,6 +144,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  confirmButtonDisabled: {
+    backgroundColor: "#ccc",
+  },
+
+  capacityWarningText: {
+    color: "#c0392b",
+    textAlign: "center",
+    fontWeight: "bold",
+    marginTop: 10,
+  },
   commentButton: {
     backgroundColor: "#3b6978",
     paddingVertical: 10,

@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { TOKEN } from "../services/api";
 
-const BookingValidationScreen = ({ navigation }) => {
+const BookingValidationScreen = ({ navigation, route }) => {
   const [form, setForm] = useState({
     fullName: "",
     address: "",
@@ -16,6 +17,20 @@ const BookingValidationScreen = ({ navigation }) => {
     phone: "",
   });
 
+  const {
+    hotel,
+    selectedServices,
+    adults,
+    children,
+    babies,
+    animals,
+    arrivalDate,
+    departureDate,
+    totalAmount,
+  } = route.params;
+
+  const arrival = new Date(arrivalDate);
+  const departure = new Date(departureDate);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => {
@@ -27,28 +42,103 @@ const BookingValidationScreen = ({ navigation }) => {
       Alert.alert("Erreur", "Tous les champs sont obligatoires.");
       return;
     }
+    // Vérification du supplément animaux
+    if (
+      animals > 0 &&
+      !selectedServices.find((s) => s.type === "pets" || s.type === "")
+    ) {
+      Alert.alert(
+        "Supplément requis",
+        "Vous devez ajouter le service 'Supplément animaux' pour continuer."
+      );
+      return;
+    }
 
     setLoading(true);
+
+    const formattedArrival = arrival.toISOString().slice(0, 10);
+    const formattedDeparture = departure.toISOString().slice(0, 10);
+    const periodTo = new Date(departure.getTime() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+
+    const reservationPayload = {
+      data: {
+        reservations: [
+          {
+            hotel_id: hotel.id,
+            room_id: hotel.id,
+            nature: "pa",
+            periods: [
+              {
+                from: formattedArrival,
+                to: periodTo,
+                amount: totalAmount,
+              },
+            ],
+            checkin: formattedArrival,
+            checkout: formattedDeparture,
+            adults,
+            children,
+            babies,
+            pets: animals,
+            trip_amount: totalAmount,
+            partner_commission_amount: 100.0,
+            partner_tva_rate: 20.0,
+          },
+        ],
+      },
+      meta: {},
+    };
+
+    console.log(
+      "➡️ Payload envoyé :",
+      JSON.stringify(reservationPayload, null, 2)
+    );
+    console.log(" Token utilisé :", TOKEN);
 
     try {
       const response = await fetch(
         "https://api.staging.cloudspire.io/partners/bookings/action/check/",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify(reservationPayload),
         }
       );
 
       const data = await response.json();
+      console.log("📩 Réponse API :", data);
 
-      if (response.ok) {
-        Alert.alert("Succès", "Réservation validée, passez au paiement !");
-        navigation.navigate("PaymentScreen", { amount: data.trip_amount }); // Redirection vers le paiement
-      } else {
-        Alert.alert("Erreur", data.message);
+      if (data.data?.available === false) {
+        Alert.alert(
+          "Indisponible",
+          "Ce logement n’est pas disponible à ces dates."
+        );
+        setLoading(false);
+        return;
       }
+
+      const total =
+        (data.data?.amounts?.periods || 0) +
+        (data.data?.amounts?.additional_services || 0);
+
+      if (!total || total === 0) {
+        Alert.alert(
+          "Montant manquant",
+          "L'API n’a pas retourné le montant total. Vérifie les dates ou les services."
+        );
+        setLoading(false);
+        return;
+      }
+
+      Alert.alert("Succès", "Réservation validée, passez au paiement !");
+      navigation.navigate("PaymentScreen", { amount: total });
     } catch (error) {
+      console.error("❌ Erreur lors de la requête :", error);
       Alert.alert("Erreur", "Impossible de contacter le serveur.");
     }
 

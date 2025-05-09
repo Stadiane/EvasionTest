@@ -92,13 +92,32 @@ const BookingScreen = ({ route, navigation }) => {
     }
   };
 
+  {
+    /* Calcul du Montant total avec services */
+  }
+  const totalAmount =
+    ((departureDate - arrivalDate) / (1000 * 60 * 60 * 24) || 1) *
+      hotel.pricings.min_trip_amount_per_night +
+    selectedServices.reduce(
+      (sum, service) => sum + (Number(service.amount) || 0),
+      0
+    );
+
   const handleReservation = () => {
     if (!user) {
-      // Si l'utilisateur n'est pas connecté, on l'envoie vers Login
       navigation.navigate("LoginScreen", { fromReservation: true });
     } else {
-      // Sinon, il peut aller valider et payer ensuite
-      navigation.navigate("BookingValidationScreen");
+      navigation.navigate("BookingValidationScreen", {
+        hotel,
+        arrivalDate: arrivalDate?.toISOString(),
+        departureDate: departureDate?.toISOString(),
+        selectedServices,
+        adults,
+        children,
+        babies,
+        animals,
+        totalAmount,
+      });
     }
   };
 
@@ -365,30 +384,30 @@ const BookingScreen = ({ route, navigation }) => {
         value={comment}
         onChangeText={setComment}
       />
-      {/* Calcul du montant total avec services */}
-      {arrivalDate &&
-        departureDate &&
-        hotel?.pricings?.min_trip_amount_per_night && (
-          <Text style={styles.montant}>
-            Montant :{" "}
-            {(
-              ((departureDate - arrivalDate) / (1000 * 60 * 60 * 24) || 1) *
-                hotel.pricings.min_trip_amount_per_night +
-              selectedServices.reduce(
-                (sum, service) => sum + (Number(service.amount) || 0),
-                0
-              )
-            ).toFixed(2)}{" "}
-            €
-          </Text>
-        )}
+      {/* Montant total avec services */}
+
+      {arrivalDate && departureDate && (
+        <Text style={styles.montant}>Montant : {totalAmount.toFixed(2)} €</Text>
+      )}
+
       {/* Bouton de confirmation */}
       <TouchableOpacity
-        style={styles.confirmButton}
+        style={[
+          styles.confirmButton,
+          (!arrivalDate || !departureDate) && styles.confirmButtonDisabled,
+        ]}
         onPress={handleReservation}
+        disabled={!arrivalDate || !departureDate}
       >
         <Text style={styles.confirmButtonText}>Confirmer la réservation</Text>
       </TouchableOpacity>
+
+      {/* Message d'avertissement si les dates ne sont pas choisies */}
+      {(!arrivalDate || !departureDate) && (
+        <Text style={styles.capacityWarningText}>
+          Veuillez sélectionner une date d'arrivée et de départ
+        </Text>
+      )}
     </ScrollView>
   );
 };

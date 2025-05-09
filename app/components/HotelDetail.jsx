@@ -61,7 +61,12 @@ const HotelDetail = ({ hotel, navigation }) => (
 
     <TouchableOpacity
       style={styles.mapButton}
-      onPress={() => navigation.navigate("Carte", { selectedHotel: hotel })}
+      onPress={() =>
+        navigation.navigate("Carte", {
+          hotels: [hotel], // envoie juste CET hôtel
+          focusHotelId: hotel.id, // pour focus dessus
+        })
+      }
     >
       <Text style={styles.mapButtonText}>Voir sur la carte</Text>
     </TouchableOpacity>
